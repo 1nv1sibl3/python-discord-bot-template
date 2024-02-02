@@ -1,11 +1,10 @@
-"""Status command"""
-from time import time
 from datetime import timedelta
+import time
 from discord.ext import commands
-from discord import ApplicationContext, Embed
+from discord import Embed
 from psutil import cpu_percent, virtual_memory
-from bot.bot import Bot
-from bot.constants import EmbedColor, Emoji
+from bot import Bot
+from constants import EmbedColor, Emoji
 
 
 class Status(commands.Cog):
@@ -17,17 +16,16 @@ class Status(commands.Cog):
     """
 
     def __init__(self, bot: Bot) -> None:
-        super().__init__()
         self.bot = bot
 
-    @commands.slash_command(
+    @commands.command(
         name="status",
         description="Returns stats about bot.",
     )
-    async def _command(self, ctx: ApplicationContext):
+    async def _command(self, ctx: commands.Context):
         # Gets stats
         latency = round(self.bot.latency * 1000)
-        uptime = timedelta(seconds=round(time()) - self.bot.start_time)
+        uptime = timedelta(seconds=round(time.time()) - self.bot.start_time)
         cpu_usage = cpu_percent()
         memory_usage = virtual_memory().percent
 
@@ -39,7 +37,7 @@ class Status(commands.Cog):
             + f"**Last Down** {Emoji.UPTIME}\n{uptime}",
             color=EmbedColor.DEFAULT_EMBED_COLOR,
         )
-        await ctx.respond(embed=embed)
+        await ctx.send(embed=embed)
 
         # Logs it for debug only
         self.bot.logger.debug(
@@ -48,10 +46,10 @@ class Status(commands.Cog):
             (latency, uptime, cpu_usage, memory_usage),
         )
 
-        # Returns of test purpose
+        # Returns for test purposes
         return (latency, uptime, cpu_usage, memory_usage)
 
 
 def setup(bot: Bot):
-    """Called by pycord to setup the cog."""
+    """Called by discord.py to setup the cog."""
     bot.add_cog(Status(bot))

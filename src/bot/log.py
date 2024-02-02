@@ -17,7 +17,7 @@ def setup_logger(log_level: str = "DEBUG") -> None:
     log_formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
-    log_file_path = "../logs/logs.log"
+    log_file_path = "logs/logs.log"
 
     # Check if it is valid
     numeric_level = getattr(logging, log_level.upper(), None)

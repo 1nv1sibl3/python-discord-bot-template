@@ -8,8 +8,8 @@ from discord.ext import commands
 class Bot(commands.Bot):
     """Subclass of commands.Bot with some extra attributes and methods."""
 
-    def __init__(self, command_prefix=..., help_command=..., **options):
-        super().__init__(command_prefix, help_command, **options)
+    def __init__(self, command_prefix=..., **options):
+        super().__init__(command_prefix, **options)
         self.logger = getLogger(__package__)
         self.logger.debug("Starting bot.")
         self.load_all_extensions()
@@ -20,6 +20,13 @@ class Bot(commands.Bot):
         """Fires when bot is ready."""
         print(f"{self.user} ready!")
         self.logger.info("Bot is ready.")
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+
+        await self.process_commands(message)
 
     def _manage_all_extensions(
         self,
@@ -48,14 +55,15 @@ class Bot(commands.Bot):
         errors = {}
 
         # Gets all extensions and also log it
-        path = Path("bot/exts/")
+        path = Path("bot/exts/bot")
         extensions = list(path.glob("**/[!_]*.py"))
         self.logger.debug("%sing %ss", action, extensions)
 
         # Goes through each extension to perform action
         for extension in extensions:
-            # Removes .py and replaces "/" with "."
-            extension = str(extension).replace("/", ".")[:-3]
+            # Removes .py and replaces "/" with "." and removes bot.
+            extension = str(extension).replace("/", ".")[4:-3]
+            
 
             # Check if extension is in ignore list
             if extension in exclude:
